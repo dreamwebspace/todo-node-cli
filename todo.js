@@ -182,7 +182,6 @@ class TodoApp {
         }
         break;
       case 'q':
-        console.log('Goodbye!');
         process.exit(0);
       case '?':
         this.printHelp();
