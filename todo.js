@@ -46,7 +46,7 @@ class TodoApp {
         const status = task.isCompleted ? '[X]' : '[ ]';
         console.log(`${index + 1}. ${status} ${task.description}`);
       });
-      console.log('');  // Add an empty line for better readability
+      console.log('');
     }
   }
 
@@ -55,7 +55,6 @@ class TodoApp {
       this.tasks[index].isCompleted = !this.tasks[index].isCompleted;
       this.saveTasks();
       const status = this.tasks[index].isCompleted ? "completed" : "incomplete";
-      //      console.log(`Marked task as ${status}: ${this.tasks[index].description}`);
       this.listTasks();
     } else {
       console.log('Invalid task number.');
@@ -66,7 +65,6 @@ class TodoApp {
     if (index >= 0 && index < this.tasks.length) {
       const removedTask = this.tasks.splice(index, 1)[0];
       this.saveTasks();
-      //      console.log('Removed task:', removedTask.description);
       this.listTasks();
     } else {
       console.log('Invalid task number.');
@@ -78,7 +76,6 @@ class TodoApp {
       const task = this.tasks.splice(index, 1)[0];
       this.tasks.splice(index - 1, 0, task);
       this.saveTasks();
-      //      console.log('Moved task up:', task.description);
       this.listTasks();
     } else {
       console.log('Cannot move task up.');
@@ -90,7 +87,6 @@ class TodoApp {
       const task = this.tasks.splice(index, 1)[0];
       this.tasks.splice(index + 1, 0, task);
       this.saveTasks();
-      //      console.log('Moved task down:', task.description);
       this.listTasks();
     } else {
       console.log('Cannot move task down.');
@@ -102,7 +98,6 @@ class TodoApp {
       const oldDescription = this.tasks[index].description;
       this.tasks[index].description = newDescription;
       this.saveTasks();
-      //      console.log('Renamed task:');
       console.log('  From:', oldDescription);
       console.log('  To:  ', newDescription);
       this.listTasks();
@@ -211,8 +206,6 @@ class TodoApp {
   }
 
   run() {
-    //    console.log('Type "h" for help or "q" to quit.');
-    //    console.log('Welcome to the Node.js To-Do App!');
     this.listTasks();  // Display tasks at the start
 
     const rl = readline.createInterface({
