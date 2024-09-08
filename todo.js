@@ -34,14 +34,11 @@ class TodoApp {
   addTask(description) {
     this.tasks.push(new Task(description));
     this.saveTasks();
-    this.listTasks();
   }
 
   listTasks() {
     if (this.tasks.length === 0) {
-      console.log();
       console.log('No tasks.');
-      console.log();
     } else {
       console.log(' ');
       this.tasks.forEach((task, index) => {
@@ -57,7 +54,6 @@ class TodoApp {
       this.tasks[index].isCompleted = !this.tasks[index].isCompleted;
       this.saveTasks();
       const status = this.tasks[index].isCompleted ? "completed" : "incomplete";
-      this.listTasks();
     } else {
       console.log('Invalid task number.');
     }
@@ -67,7 +63,6 @@ class TodoApp {
     if (index >= 0 && index < this.tasks.length) {
       const removedTask = this.tasks.splice(index, 1)[0];
       this.saveTasks();
-      this.listTasks();
     } else {
       console.log('Invalid task number.');
     }
@@ -78,7 +73,6 @@ class TodoApp {
       const task = this.tasks.splice(index, 1)[0];
       this.tasks.splice(index - 1, 0, task);
       this.saveTasks();
-      this.listTasks();
     } else {
       console.log('Cannot move task up.');
     }
@@ -89,7 +83,6 @@ class TodoApp {
       const task = this.tasks.splice(index, 1)[0];
       this.tasks.splice(index + 1, 0, task);
       this.saveTasks();
-      this.listTasks();
     } else {
       console.log('Cannot move task down.');
     }
@@ -100,7 +93,6 @@ class TodoApp {
       const oldDescription = this.tasks[index].description;
       this.tasks[index].description = newDescription;
       this.saveTasks();
-      this.listTasks();
     } else {
       console.log('Invalid task number.');
     }
@@ -118,7 +110,7 @@ class TodoApp {
         }
         break;
       case 't':
-        this.listTasks();
+        // No need to do anything here, as listTasks() will be called after switch
         break;
       case 'x':
         if (parts.length > 1) {
@@ -189,6 +181,8 @@ class TodoApp {
       default:
         console.log('Unknown command. Type "?" for help.');
     }
+    // Always list tasks after processing any command
+    this.listTasks();
   }
 
   printHelp() {
@@ -216,6 +210,8 @@ class TodoApp {
       rl.question('> ', (input) => {
         if (input.trim() !== '') {
           this.processCommand(input);
+        } else {
+          this.listTasks(); // List tasks even if input is empty
         }
         promptUser();
       });
