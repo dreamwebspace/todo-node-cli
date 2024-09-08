@@ -111,6 +111,7 @@ class TodoApp {
       //      console.log('Subtask added successfully.');
     } else {
       console.log('Invalid task number.');
+      console.log();
     }
   }
 
@@ -138,6 +139,7 @@ class TodoApp {
           //        console.log('Subtask status toggled.');
         } else {
           console.log('Invalid subtask number.');
+          console.log();
         }
       } else {
         this.tasks[taskIndex].completed = !this.tasks[taskIndex].completed;
@@ -145,6 +147,7 @@ class TodoApp {
       }
     } else {
       console.log('Invalid task number.');
+      console.log();
     }
   }
 
@@ -157,6 +160,7 @@ class TodoApp {
           //    console.log('Subtask removed successfully.');
         } else {
           console.log('Invalid subtask number.');
+          console.log();
         }
       } else {
         this.tasks.splice(taskIndex, 1);
@@ -164,6 +168,7 @@ class TodoApp {
       }
     } else {
       console.log('Invalid task number.');
+      console.log();
     }
   }
 
@@ -185,6 +190,7 @@ class TodoApp {
       }
     } else {
       console.log('Invalid task number.');
+      console.log();
     }
   }
 
@@ -206,6 +212,7 @@ class TodoApp {
       }
     } else {
       console.log('Invalid task number.');
+      console.log();
     }
   }
 
@@ -218,6 +225,7 @@ class TodoApp {
           //      console.log('Subtask renamed successfully.');
         } else {
           console.log('Invalid subtask number.');
+          console.log();
         }
       } else {
         this.tasks[taskIndex].description = newDescription;
@@ -225,6 +233,7 @@ class TodoApp {
       }
     } else {
       console.log('Invalid task number.');
+      console.log();
     }
   }
 
