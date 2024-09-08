@@ -98,8 +98,6 @@ class TodoApp {
       const oldDescription = this.tasks[index].description;
       this.tasks[index].description = newDescription;
       this.saveTasks();
-      console.log('  From:', oldDescription);
-      console.log('  To:  ', newDescription);
       this.listTasks();
     } else {
       console.log('Invalid task number.');
