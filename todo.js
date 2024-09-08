@@ -39,7 +39,9 @@ class TodoApp {
 
   listTasks() {
     if (this.tasks.length === 0) {
+      console.log();
       console.log('No tasks.');
+      console.log();
     } else {
       console.log(' ');
       this.tasks.forEach((task, index) => {
