@@ -36,7 +36,7 @@ class TodoApp {
   }
 
   start() {
-    console.log('Welcome to the To-Do App!');
+    console.log();
     console.log('Type ? for help or q to quit.');
     console.log();
     this.listTasks();  // Display tasks at start
@@ -90,7 +90,7 @@ class TodoApp {
     }
 
     if (command !== 't' && command !== '?') {
-      console.log();
+      //  console.log();
       this.listTasks();
     }
 
@@ -101,14 +101,14 @@ class TodoApp {
 
   addTask(description) {
     this.tasks.push(new Task(description));
-    console.log('Task added successfully.');
+    //    console.log('Task added successfully.');
   }
 
   addSubtask(taskIndex, description) {
     const index = parseInt(taskIndex) - 1;
     if (this.isValidIndex(index)) {
       this.tasks[index].subtasks.push(new Task(description));
-      console.log('Subtask added successfully.');
+      //      console.log('Subtask added successfully.');
     } else {
       console.log('Invalid task number.');
     }
@@ -120,8 +120,7 @@ class TodoApp {
       return;
     }
 
-    console.log('Current tasks:');
-    console.log();
+    // console.log('Current tasks:');
     this.tasks.forEach((task, index) => {
       console.log(`${index + 1}. [${task.completed ? 'X' : ' '}] ${task.description}`);
       task.subtasks.forEach((subtask, subIndex) => {
@@ -136,13 +135,13 @@ class TodoApp {
       if (subtaskIndex !== undefined) {
         if (this.isValidSubtaskIndex(taskIndex, subtaskIndex)) {
           this.tasks[taskIndex].subtasks[subtaskIndex].completed = !this.tasks[taskIndex].subtasks[subtaskIndex].completed;
-          console.log('Subtask status toggled.');
+          //        console.log('Subtask status toggled.');
         } else {
           console.log('Invalid subtask number.');
         }
       } else {
         this.tasks[taskIndex].completed = !this.tasks[taskIndex].completed;
-        console.log('Task status toggled.');
+        //    console.log('Task status toggled.');
       }
     } else {
       console.log('Invalid task number.');
@@ -155,13 +154,13 @@ class TodoApp {
       if (subtaskIndex !== undefined) {
         if (this.isValidSubtaskIndex(taskIndex, subtaskIndex)) {
           this.tasks[taskIndex].subtasks.splice(subtaskIndex, 1);
-          console.log('Subtask removed successfully.');
+          //    console.log('Subtask removed successfully.');
         } else {
           console.log('Invalid subtask number.');
         }
       } else {
         this.tasks.splice(taskIndex, 1);
-        console.log('Task removed successfully.');
+        //        console.log('Task removed successfully.');
       }
     } else {
       console.log('Invalid task number.');
@@ -174,13 +173,13 @@ class TodoApp {
       if (subtaskIndex !== undefined) {
         if (this.isValidSubtaskIndex(taskIndex, subtaskIndex) && subtaskIndex > 0) {
           this.swapArrayElements(this.tasks[taskIndex].subtasks, subtaskIndex, subtaskIndex - 1);
-          console.log('Subtask moved up.');
+          //        console.log('Subtask moved up.');
         } else {
           console.log('Cannot move subtask up.');
         }
       } else if (taskIndex > 0) {
         this.swapArrayElements(this.tasks, taskIndex, taskIndex - 1);
-        console.log('Task moved up.');
+        //    console.log('Task moved up.');
       } else {
         console.log('Cannot move task up.');
       }
@@ -195,13 +194,13 @@ class TodoApp {
       if (subtaskIndex !== undefined) {
         if (this.isValidSubtaskIndex(taskIndex, subtaskIndex) && subtaskIndex < this.tasks[taskIndex].subtasks.length - 1) {
           this.swapArrayElements(this.tasks[taskIndex].subtasks, subtaskIndex, subtaskIndex + 1);
-          console.log('Subtask moved down.');
+          //          console.log('Subtask moved down.');
         } else {
           console.log('Cannot move subtask down.');
         }
       } else if (taskIndex < this.tasks.length - 1) {
         this.swapArrayElements(this.tasks, taskIndex, taskIndex + 1);
-        console.log('Task moved down.');
+        //      console.log('Task moved down.');
       } else {
         console.log('Cannot move task down.');
       }
@@ -216,13 +215,13 @@ class TodoApp {
       if (subtaskIndex !== undefined) {
         if (this.isValidSubtaskIndex(taskIndex, subtaskIndex)) {
           this.tasks[taskIndex].subtasks[subtaskIndex].description = newDescription;
-          console.log('Subtask renamed successfully.');
+          //      console.log('Subtask renamed successfully.');
         } else {
           console.log('Invalid subtask number.');
         }
       } else {
         this.tasks[taskIndex].description = newDescription;
-        console.log('Task renamed successfully.');
+        //  console.log('Task renamed successfully.');
       }
     } else {
       console.log('Invalid task number.');
@@ -244,7 +243,7 @@ class TodoApp {
   }
 
   quit() {
-    console.log('Goodbye!');
+    //    console.log('Goodbye!');
     this.rl.close();
   }
 
