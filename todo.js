@@ -1,224 +1,272 @@
-const fs = require('fs');
 const readline = require('readline');
+const fs = require('fs');
+
+const TASKS_FILE = 'tasks.json';
 
 class Task {
-  constructor(description, isCompleted = false) {
+  constructor(description) {
     this.description = description;
-    this.isCompleted = isCompleted;
+    this.completed = false;
+    this.subtasks = [];
   }
 }
 
 class TodoApp {
   constructor() {
     this.tasks = [];
-    this.fileName = 'tasks.json';
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
     this.loadTasks();
   }
 
   loadTasks() {
     try {
-      const data = fs.readFileSync(this.fileName, 'utf8');
-      this.tasks = JSON.parse(data).map(task => new Task(task.description, task.isCompleted));
+      const data = fs.readFileSync(TASKS_FILE, 'utf8');
+      this.tasks = JSON.parse(data);
     } catch (err) {
-      if (err.code !== 'ENOENT') {
-        console.error('Error reading file:', err);
-      }
+      this.tasks = [];
     }
   }
 
   saveTasks() {
-    const data = JSON.stringify(this.tasks);
-    fs.writeFileSync(this.fileName, data);
+    const data = JSON.stringify(this.tasks, null, 2);
+    fs.writeFileSync(TASKS_FILE, data, 'utf8');
+  }
+
+  start() {
+    console.log('Welcome to the To-Do App!');
+    console.log('Type ? for help or q to quit.');
+    console.log();
+    this.listTasks();  // Display tasks at start
+    console.log();
+    this.promptUser();
+  }
+
+  promptUser() {
+    this.rl.question('> ', (input) => {
+      console.log();
+      this.handleInput(input);
+    });
+  }
+
+  handleInput(input) {
+    const [command, ...args] = input.split(' ');
+
+    switch (command) {
+      case 'a':
+        this.addTask(args.join(' '));
+        break;
+      case 's':
+        this.addSubtask(args[0], args.slice(1).join(' '));
+        break;
+      case 't':
+        this.listTasks();
+        break;
+      case 'x':
+        this.toggleComplete(args[0]);
+        break;
+      case 'd':
+        this.removeTask(args[0]);
+        break;
+      case 'h':
+        this.moveTaskUp(args[0]);
+        break;
+      case 'l':
+        this.moveTaskDown(args[0]);
+        break;
+      case 'r':
+        this.renameTask(args[0], args.slice(1).join(' '));
+        break;
+      case '?':
+        this.showHelp();
+        break;
+      case 'q':
+        this.quit();
+        return;
+      default:
+        console.log('Invalid command. Type ? for help.');
+    }
+
+    if (command !== 't' && command !== '?') {
+      console.log();
+      this.listTasks();
+    }
+
+    this.saveTasks();
+    console.log();
+    this.promptUser();
   }
 
   addTask(description) {
     this.tasks.push(new Task(description));
-    this.saveTasks();
+    console.log('Task added successfully.');
+  }
+
+  addSubtask(taskIndex, description) {
+    const index = parseInt(taskIndex) - 1;
+    if (this.isValidIndex(index)) {
+      this.tasks[index].subtasks.push(new Task(description));
+      console.log('Subtask added successfully.');
+    } else {
+      console.log('Invalid task number.');
+    }
   }
 
   listTasks() {
     if (this.tasks.length === 0) {
       console.log('No tasks.');
-    } else {
-      console.log(' ');
-      this.tasks.forEach((task, index) => {
-        const status = task.isCompleted ? '[X]' : '[ ]';
-        console.log(`${index + 1}. ${status} ${task.description}`);
+      return;
+    }
+
+    console.log('Current tasks:');
+    console.log();
+    this.tasks.forEach((task, index) => {
+      console.log(`${index + 1}. [${task.completed ? 'X' : ' '}] ${task.description}`);
+      task.subtasks.forEach((subtask, subIndex) => {
+        console.log(`   ${index + 1}.${subIndex + 1}. [${subtask.completed ? 'X' : ' '}] ${subtask.description}`);
       });
-      console.log('');
-    }
-  }
-
-  toggleTaskCompletion(index) {
-    if (index >= 0 && index < this.tasks.length) {
-      this.tasks[index].isCompleted = !this.tasks[index].isCompleted;
-      this.saveTasks();
-      const status = this.tasks[index].isCompleted ? "completed" : "incomplete";
-    } else {
-      console.log('Invalid task number.');
-    }
-  }
-
-  removeTask(index) {
-    if (index >= 0 && index < this.tasks.length) {
-      const removedTask = this.tasks.splice(index, 1)[0];
-      this.saveTasks();
-    } else {
-      console.log('Invalid task number.');
-    }
-  }
-
-  moveTaskUp(index) {
-    if (index > 0 && index < this.tasks.length) {
-      const task = this.tasks.splice(index, 1)[0];
-      this.tasks.splice(index - 1, 0, task);
-      this.saveTasks();
-    } else {
-      console.log('Cannot move task up.');
-    }
-  }
-
-  moveTaskDown(index) {
-    if (index >= 0 && index < this.tasks.length - 1) {
-      const task = this.tasks.splice(index, 1)[0];
-      this.tasks.splice(index + 1, 0, task);
-      this.saveTasks();
-    } else {
-      console.log('Cannot move task down.');
-    }
-  }
-
-  renameTask(index, newDescription) {
-    if (index >= 0 && index < this.tasks.length) {
-      const oldDescription = this.tasks[index].description;
-      this.tasks[index].description = newDescription;
-      this.saveTasks();
-    } else {
-      console.log('Invalid task number.');
-    }
-  }
-
-  processCommand(command) {
-    const parts = command.split(' ');
-    const action = parts[0].toLowerCase();
-    switch (action) {
-      case 'a':
-        if (parts.length > 1) {
-          this.addTask(parts.slice(1).join(' '));
-        } else {
-          console.log('Usage: a <task description>');
-        }
-        break;
-      case 't':
-        // No need to do anything here, as listTasks() will be called after switch
-        break;
-      case 'x':
-        if (parts.length > 1) {
-          const taskNumber = parseInt(parts[1]);
-          if (!isNaN(taskNumber)) {
-            this.toggleTaskCompletion(taskNumber - 1);
-          } else {
-            console.log('Invalid task number.');
-          }
-        } else {
-          console.log('Usage: x <task number>');
-        }
-        break;
-      case 'd':
-        if (parts.length > 1) {
-          const taskNumber = parseInt(parts[1]);
-          if (!isNaN(taskNumber)) {
-            this.removeTask(taskNumber - 1);
-          } else {
-            console.log('Invalid task number.');
-          }
-        } else {
-          console.log('Usage: d <task number>');
-        }
-        break;
-      case 'h':
-        if (parts.length > 1) {
-          const taskNumber = parseInt(parts[1]);
-          if (!isNaN(taskNumber)) {
-            this.moveTaskUp(taskNumber - 1);
-          } else {
-            console.log('Invalid task number.');
-          }
-        } else {
-          console.log('Usage: h <task number>');
-        }
-        break;
-      case 'l':
-        if (parts.length > 1) {
-          const taskNumber = parseInt(parts[1]);
-          if (!isNaN(taskNumber)) {
-            this.moveTaskDown(taskNumber - 1);
-          } else {
-            console.log('Invalid task number.');
-          }
-        } else {
-          console.log('Usage: l <task number>');
-        }
-        break;
-      case 'r':
-        if (parts.length > 2) {
-          const taskNumber = parseInt(parts[1]);
-          if (!isNaN(taskNumber)) {
-            const newDescription = parts.slice(2).join(' ');
-            this.renameTask(taskNumber - 1, newDescription);
-          } else {
-            console.log('Invalid task number.');
-          }
-        } else {
-          console.log('Usage: r <task number> <new task description>');
-        }
-        break;
-      case 'q':
-        process.exit(0);
-      case '?':
-        this.printHelp();
-        break;
-      default:
-        console.log('Unknown command. Type "?" for help.');
-    }
-    // Always list tasks after processing any command
-    this.listTasks();
-  }
-
-  printHelp() {
-    console.log('Available commands:');
-    console.log('  a <task description> - Add a new task');
-    console.log('  t - List all tasks');
-    console.log('  x <task number> - Mark task as complete/incomplete');
-    console.log('  d <task number> - Remove task');
-    console.log('  h <task number> - Move task higher');
-    console.log('  l <task number> - Move task lower');
-    console.log('  r <task number> <new description> - Rename task');
-    console.log('  ? - Show this help message');
-    console.log('  q - Quit the application');
-  }
-
-  run() {
-    this.listTasks();  // Display tasks at the start
-
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
     });
+  }
 
-    const promptUser = () => {
-      rl.question('> ', (input) => {
-        if (input.trim() !== '') {
-          this.processCommand(input);
+  toggleComplete(identifier) {
+    const [taskIndex, subtaskIndex] = this.parseIdentifier(identifier);
+    if (this.isValidIndex(taskIndex)) {
+      if (subtaskIndex !== undefined) {
+        if (this.isValidSubtaskIndex(taskIndex, subtaskIndex)) {
+          this.tasks[taskIndex].subtasks[subtaskIndex].completed = !this.tasks[taskIndex].subtasks[subtaskIndex].completed;
+          console.log('Subtask status toggled.');
         } else {
-          this.listTasks(); // List tasks even if input is empty
+          console.log('Invalid subtask number.');
         }
-        promptUser();
-      });
-    };
+      } else {
+        this.tasks[taskIndex].completed = !this.tasks[taskIndex].completed;
+        console.log('Task status toggled.');
+      }
+    } else {
+      console.log('Invalid task number.');
+    }
+  }
 
-    promptUser();
+  removeTask(identifier) {
+    const [taskIndex, subtaskIndex] = this.parseIdentifier(identifier);
+    if (this.isValidIndex(taskIndex)) {
+      if (subtaskIndex !== undefined) {
+        if (this.isValidSubtaskIndex(taskIndex, subtaskIndex)) {
+          this.tasks[taskIndex].subtasks.splice(subtaskIndex, 1);
+          console.log('Subtask removed successfully.');
+        } else {
+          console.log('Invalid subtask number.');
+        }
+      } else {
+        this.tasks.splice(taskIndex, 1);
+        console.log('Task removed successfully.');
+      }
+    } else {
+      console.log('Invalid task number.');
+    }
+  }
+
+  moveTaskUp(identifier) {
+    const [taskIndex, subtaskIndex] = this.parseIdentifier(identifier);
+    if (this.isValidIndex(taskIndex)) {
+      if (subtaskIndex !== undefined) {
+        if (this.isValidSubtaskIndex(taskIndex, subtaskIndex) && subtaskIndex > 0) {
+          this.swapArrayElements(this.tasks[taskIndex].subtasks, subtaskIndex, subtaskIndex - 1);
+          console.log('Subtask moved up.');
+        } else {
+          console.log('Cannot move subtask up.');
+        }
+      } else if (taskIndex > 0) {
+        this.swapArrayElements(this.tasks, taskIndex, taskIndex - 1);
+        console.log('Task moved up.');
+      } else {
+        console.log('Cannot move task up.');
+      }
+    } else {
+      console.log('Invalid task number.');
+    }
+  }
+
+  moveTaskDown(identifier) {
+    const [taskIndex, subtaskIndex] = this.parseIdentifier(identifier);
+    if (this.isValidIndex(taskIndex)) {
+      if (subtaskIndex !== undefined) {
+        if (this.isValidSubtaskIndex(taskIndex, subtaskIndex) && subtaskIndex < this.tasks[taskIndex].subtasks.length - 1) {
+          this.swapArrayElements(this.tasks[taskIndex].subtasks, subtaskIndex, subtaskIndex + 1);
+          console.log('Subtask moved down.');
+        } else {
+          console.log('Cannot move subtask down.');
+        }
+      } else if (taskIndex < this.tasks.length - 1) {
+        this.swapArrayElements(this.tasks, taskIndex, taskIndex + 1);
+        console.log('Task moved down.');
+      } else {
+        console.log('Cannot move task down.');
+      }
+    } else {
+      console.log('Invalid task number.');
+    }
+  }
+
+  renameTask(identifier, newDescription) {
+    const [taskIndex, subtaskIndex] = this.parseIdentifier(identifier);
+    if (this.isValidIndex(taskIndex)) {
+      if (subtaskIndex !== undefined) {
+        if (this.isValidSubtaskIndex(taskIndex, subtaskIndex)) {
+          this.tasks[taskIndex].subtasks[subtaskIndex].description = newDescription;
+          console.log('Subtask renamed successfully.');
+        } else {
+          console.log('Invalid subtask number.');
+        }
+      } else {
+        this.tasks[taskIndex].description = newDescription;
+        console.log('Task renamed successfully.');
+      }
+    } else {
+      console.log('Invalid task number.');
+    }
+  }
+
+  showHelp() {
+    console.log('Available commands:');
+    console.log('a <task description> - Add a new task');
+    console.log('s <task number> <subtask description> - Add a subtask to a task');
+    console.log('t - List all tasks');
+    console.log('x <task number>[.<subtask number>] - Mark task or subtask as complete/incomplete');
+    console.log('d <task number>[.<subtask number>] - Remove task or subtask');
+    console.log('h <task number>[.<subtask number>] - Move task or subtask higher');
+    console.log('l <task number>[.<subtask number>] - Move task or subtask lower');
+    console.log('r <task number>[.<subtask number>] <new description> - Rename task or subtask');
+    console.log('? - Show this help message');
+    console.log('q - Quit the application');
+  }
+
+  quit() {
+    console.log('Goodbye!');
+    this.rl.close();
+  }
+
+  isValidIndex(index) {
+    return index >= 0 && index < this.tasks.length;
+  }
+
+  isValidSubtaskIndex(taskIndex, subtaskIndex) {
+    return subtaskIndex >= 0 && subtaskIndex < this.tasks[taskIndex].subtasks.length;
+  }
+
+  parseIdentifier(identifier) {
+    const [taskStr, subtaskStr] = identifier.split('.');
+    const taskIndex = parseInt(taskStr) - 1;
+    const subtaskIndex = subtaskStr ? parseInt(subtaskStr) - 1 : undefined;
+    return [taskIndex, subtaskIndex];
+  }
+
+  swapArrayElements(array, index1, index2) {
+    [array[index1], array[index2]] = [array[index2], array[index1]];
   }
 }
 
-new TodoApp().run();
+const app = new TodoApp();
+app.start();
